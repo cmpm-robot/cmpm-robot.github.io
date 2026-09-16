@@ -1,0 +1,250 @@
+/* Palatino everywhere. No webfont: Palatino ships with macOS and Windows, and the
+   URW/TeX Gyre clones cover most Linux boxes. Georgia is the last resort before the
+   generic serif, because it keeps the same old-style feel at similar metrics. */
+:root {
+  --font-body: "Palatino Linotype", "Book Antiqua", Palatino, "URW Palladio L",
+               "P052", "TeX Gyre Pagella", "Palatino LT STD", Georgia, serif;
+
+  --ink:     #1a1a1a;
+  --muted:   #2b2b2b;
+  --faint:   #454545;
+  --bg:      #ffffff;
+  --surface: #f6f5f2;
+  --border:  #e2ded7;
+  --accent:  #00274c;
+
+  --measure: 42rem;   /* text column */
+  --wide:    68rem;   /* figures and full-bleed blocks */
+  --radius:  8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink:     #ececec;
+    /* Mirrored, not copied: "darker" in light mode means "brighter" here, since the
+       point is more contrast against the background rather than a literal colour. */
+    --muted:   #dcdcdc;
+    --faint:   #c0c0c0;
+    --bg:      #131313;
+    --surface: #1c1c1c;
+    --border:  #2e2e2e;
+    /* The light-mode accent is far too dark to read on this background, so dark mode
+       gets a light tint of the same hue instead. */
+    --accent:  #8ab4e0;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 4.5rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+main { max-width: var(--wide); margin: 0 auto; padding: 0 1.5rem; }
+
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* Anything still carrying template copy is dimmed and italicised, so an unfilled
+   slot is obvious on the page instead of shipping as though it were real text.
+   Delete the attribute in index.html as each one is written. */
+[data-placeholder] { color: var(--faint); font-style: italic; }
+
+/* --- nav ------------------------------------------------------------------- */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-inner {
+  max-width: var(--wide);
+  margin: 0 auto;
+  padding: 0.6rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.nav-brand { font-weight: 700; letter-spacing: 0.04em; text-decoration: none; }
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+  margin: 0 0 0 auto;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9375rem;
+}
+
+.nav-links a { color: var(--muted); text-decoration: none; }
+.nav-links a:hover { color: var(--accent); }
+
+/* --- hero ------------------------------------------------------------------ */
+
+.hero { padding: 4rem 0 1rem; text-align: center; }
+
+/* Two lines, broken after "Manipulation" by an explicit <br> in the markup. No
+   max-width and no text-wrap:balance -- either one would re-wrap the first line
+   and turn it into three. The clamp is sized so line one still fits the column at
+   desktop width; below that it wraps further, which is what it should do. */
+.title {
+  margin: 0 auto;
+  font-size: clamp(1.4rem, 0.55rem + 2.15vw, 2.2rem);
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: -0.012em;
+}
+
+.authors { margin: 1.5rem auto 0.25rem; font-size: 1.125rem; }
+.affil   { margin: 0; font-size: 1rem; }
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 1.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.45rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.9375rem;
+  text-decoration: none;
+}
+
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.teaser { margin-top: 2.5rem; }
+
+/* --- sections -------------------------------------------------------------- */
+
+section { padding: 2.75rem 0; }
+
+section > h2 {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+}
+
+section > p,
+section > h2 { max-width: var(--measure); margin-left: auto; margin-right: auto; }
+
+/* Long-hand on purpose: the `margin` shorthand would reset the auto side margins
+   set above and drop the paragraph out of the centred text column. */
+section > p { margin-top: 0; margin-bottom: 1rem; }
+
+/* --- figures and placeholder slots ----------------------------------------- */
+
+figure { margin: 2rem 0; }
+
+figure img,
+figure video { display: block; width: 100%; height: auto; border-radius: var(--radius); }
+
+figcaption {
+  max-width: var(--measure);
+  margin: 0.75rem auto 0;
+  font-size: 0.9375rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* A visible stand-in for artwork that is not in yet. Replace the whole div with
+   <img src="..." alt="..."> or a <video>. */
+.slot {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 5;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--faint);
+  font-size: 0.9375rem;
+  font-style: italic;
+}
+
+.slot-sq  { aspect-ratio: 4 / 3; }
+.slot-vid { aspect-ratio: 16 / 9; }
+
+.grid { display: grid; gap: 1.25rem; }
+
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+.card { margin: 0; }
+.card figcaption { text-align: center; margin-top: 0.5rem; }
+
+@media (max-width: 800px) {
+  .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .grid-3, .grid-4 { grid-template-columns: 1fr; }
+}
+
+/* --- bibtex ----------------------------------------------------------------- */
+
+.bibtex { position: relative; max-width: var(--measure); margin: 0 auto; }
+
+.bibtex pre {
+  margin: 0;
+  padding: 1.1rem 1.25rem;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.copy {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.copy:hover { border-color: var(--accent); color: var(--accent); }
+
+/* --- footer ----------------------------------------------------------------- */
+
+.footer {
+  padding: 3rem 0 4rem;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 0.9375rem;
+}
