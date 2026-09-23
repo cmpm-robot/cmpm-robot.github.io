@@ -6,6 +6,10 @@
 <title>Chaining Visuomotor Skills for Constrained Manipulation Through Perceptual Manipulation</title>
 <meta name="description" content="Project page.">
 
+<!-- Kept out of search results while the page is still placeholders and the paper is
+     under review. Delete this line (and robots.txt) to let it be indexed. -->
+<meta name="robots" content="noindex, nofollow">
+
 <meta property="og:type" content="website">
 <meta property="og:title" content="Chaining Visuomotor Skills for Constrained Manipulation Through Perceptual Manipulation">
 <meta property="og:description" content="Project page.">
@@ -22,9 +26,15 @@
     <ul class="nav-links">
       <li><a href="#abstract">Abstract</a></li>
       <li><a href="#method">Method</a></li>
-      <li><a href="#tasks">Tasks</a></li>
-      <li><a href="#results">Results</a></li>
-      <li><a href="#videos">Videos</a></li>
+      <li class="nav-drop">
+        <a href="#tasks">Tasks</a>
+        <ul class="nav-menu">
+          <li><a href="#task-pnp">Pick and Place</a></li>
+          <li><a href="#task-push">Push</a></li>
+          <li><a href="#task-ramp">Ramp</a></li>
+          <li><a href="#task-block">Block</a></li>
+        </ul>
+      </li>
       <li><a href="#bibtex">BibTeX</a></li>
     </ul>
   </div>
@@ -52,75 +62,150 @@
                 collision; a transformed observation induces a shifted grasp and a feasible
                 placement. A bilevel planner searches transformations in simulation, and the grasp
                 offsets it reaches are far more diverse than those from resampling the policy.">
-      <figcaption data-placeholder>Teaser caption.</figcaption>
+      <figcaption><strong>CMPM chains visuomotor skills by parameterizing visuomotor policies
+        with transformations of what the policy observes.</strong> <u>Left</u>: placing the milk carton
+        on the cabinet decomposes into a <em>pick</em> followed by a <em>place</em>, and the
+        placement is collision-free only for some of the grasps the pick skill can produce, so
+        the two skills cannot be chained without choosing a valid grasp. <u>Middle</u>: the policy is
+        frozen and acts on what it is shown, so shifting the carton in its observation shifts
+        where the gripper takes hold of the real carton. A perceptual transformation is then a
+        continuous parameter of the skill, and a bilevel planner searches it in simulation for an
+        assignment whose grasp satisfies the later placement constraint. <u>Right</u>: resampling the
+        VLA's flow-matching noise leaves the grasp clustered near one end of the carton, whereas
+        transformations spread the grasps across it, into the region where a placement
+        exists.</figcaption>
     </figure>
   </header>
 
   <section id="abstract">
     <h2>Abstract</h2>
-    <p data-placeholder>Abstract goes here.</p>
+    <p>Long-horizon manipulation often requires constraints to be satisfied across several
+      skills: how one skill is executed determines whether a later skill is feasible. Task and
+      motion planning addresses these dependencies by searching jointly over the continuous
+      parameters of each skill, but fixed visuomotor policies, including vision-language-action
+      models, expose no such parameters. We introduce Constrained Manipulation through Perceptual
+      Manipulation (CMPM), a deployment-time method that parameterizes a fixed visuomotor policy
+      by transforming its visual observations. The policy acts on the transformed observation
+      while its actions are executed in the true world, so different transformations induce
+      different closed-loop behaviors without changing the policy itself. A bilevel planner
+      searches over these transformations alongside conventional parameters such as grasps and
+      placement poses, rolls out the resulting skill sequence in simulation, and retains
+      refinements that satisfy constraints of the task. We evaluate CMPM in four simulated
+      environments, with one of them demonstrated on a real robot through real-to-sim-to-real
+      transfer, and our experiments show that perceptual transformations can expose useful
+      continuous choices in otherwise fixed visuomotor skills, allowing them to participate in
+      planning under constraints that span multiple skills.</p>
   </section>
 
   <section id="method">
     <h2>Method</h2>
-    <p data-placeholder>Method summary goes here.</p>
+    <p>We want to <u>chain visuomotor skills with motion-planning skills under constraints that
+      span several skills</u>. Bilevel planning
+      already resolves such constraints among motion-planning skills by searching over their
+      parameters during refinement; what prevents it from doing the same for a visuomotor skill
+      is that the skill has no parameters to search over. Rather than training a policy that
+      accepts parameters, <u>we endow an existing policy with a parameter space by transforming what
+      it perceives: the policy acts on a transformed observation in place of the true one, and its
+      actions are executed in the true world.</u> The transformation is then a parameter like any
+      other, and refinement searches over it exactly as it searches over grasps and placements. We
+      refer to the approach as <strong>C</strong>onstrained <strong>M</strong>anipulation through
+      <strong>P</strong>erceptual <strong>M</strong>anipulation (CMPM).</p>
     <figure>
       <img src="static/images/pipeline.png" width="1920" height="800"
            alt="Method overview: a task is transferred real-to-sim, a symbolic planner produces a
                 skill skeleton whose parameters include a perceptual transformation, and low-level
                 planning samples those parameters by rolling out the policy on transformed
                 observations.">
-      <figcaption data-placeholder>Pipeline caption.</figcaption>
+      <figcaption>CMPM in the packing environment, from the real scene to the trajectory executed
+        on hardware. (1) <strong>High-level planning</strong> turns the environment and the language command into a
+        skeleton, in which every skill carries a continuous parameter: a perceptual transformation
+        <i>T</i><sub>&delta;</sub> for the VLA push skill, and a grasp or placement pose for the
+        motion-planning skills. (2) <strong>Low-level planning</strong> samples these parameters and simulates the
+        result. For the push skill, the <u>actual observation <i>o</i>(<i>s</i>) is replaced by
+        <i>T</i><sub>&delta;</sub>(<i>o</i>(<i>s</i>)), here by shifting the cubes by
+        <i>&delta;</i></u>; the policy <i>&pi;</i> acts on the transformed observation, and the action
+        it returns is executed in the true world, <i>s</i>&prime; = <i>f</i>(<i>s</i>,
+        <i>a</i>).</figcaption>
     </figure>
   </section>
 
   <section id="tasks">
     <h2>Tasks</h2>
-    <p data-placeholder>Task overview goes here.</p>
-    <div class="grid grid-4">
+
+    <div class="task" id="task-pnp">
+      <h3>Pick and Place</h3>
       <figure class="card">
-        <div class="slot slot-sq" data-slot>figure</div>
-        <figcaption data-placeholder>Task one.</figcaption>
+        <video src="static/videos/pnp_real_vs_transformed.mp4" width="1024" height="1024"
+               controls loop muted playsinline preload="metadata"></video>
+        <figcaption><strong>Pick and Place in simulation</strong>: the robot picks a milk carton off the floor and
+          places it on the cluttered top of a cabinet, where the clutter leaves only a narrow
+          collision-free placement, so where the carton is grasped largely decides whether it can
+          be placed. The transformation translates the carton along the pick axis in the image,
+          shifting where the VLA grasps it.</figcaption>
       </figure>
       <figure class="card">
-        <div class="slot slot-sq" data-slot>figure</div>
-        <figcaption data-placeholder>Task two.</figcaption>
-      </figure>
-      <figure class="card">
-        <div class="slot slot-sq" data-slot>figure</div>
-        <figcaption data-placeholder>Task three.</figcaption>
-      </figure>
-      <figure class="card">
-        <div class="slot slot-sq" data-slot>figure</div>
-        <figcaption data-placeholder>Task four.</figcaption>
+        <img src="static/images/results_pnp.svg" width="506" height="159"
+             alt="Pick and place: success rate and planning time per method.">
       </figure>
     </div>
-  </section>
 
-  <section id="results">
-    <h2>Results</h2>
-    <p data-placeholder>Results summary goes here.</p>
-    <figure>
-      <div class="slot" data-slot>results figure</div>
-      <figcaption data-placeholder>Results caption.</figcaption>
-    </figure>
-  </section>
-
-  <section id="videos">
-    <h2>Videos</h2>
-    <p data-placeholder>Rollout description goes here.</p>
-    <div class="grid grid-3">
+    <div class="task" id="task-push">
+      <h3>Push</h3>
       <figure class="card">
-        <div class="slot slot-vid" data-slot>video</div>
-        <figcaption data-placeholder>Rollout one.</figcaption>
+        <video src="static/videos/push_real_vs_transformed.mp4" width="1024" height="1024"
+               controls loop muted playsinline preload="metadata"></video>
+        <figcaption><strong>Pushing in simulation</strong>: the robot must place a milk carton between a box and a
+          plate whose gap is initially too narrow, so the box must first be pushed aside. The push
+          skill stops when it perceives the box contacting the object beyond it; translating the
+          box along the push axis in the image changes when that contact appears, and with it how
+          far the box is actually pushed.</figcaption>
       </figure>
       <figure class="card">
-        <div class="slot slot-vid" data-slot>video</div>
-        <figcaption data-placeholder>Rollout two.</figcaption>
+        <img src="static/images/results_push.svg" width="506" height="159"
+             alt="Push: success rate and planning time per method.">
+      </figure>
+    </div>
+
+    <div class="task" id="task-ramp">
+      <h3>Ramp</h3>
+      <figure class="card">
+        <video src="static/videos/ramp_real_vs_transformed.mp4" width="1280" height="720"
+               controls loop muted playsinline preload="metadata"></video>
+        <figcaption><strong>Ramp in simulation</strong>: a ball released onto a ramp must travel far enough to reach
+          a prescribed zone, which depends on the ramp's angle; on its own, the push skill drives
+          the ramp to one fixed angle. The transformation offsets the rendered height of the table,
+          which moves the policy's horizontal sweep up or down, and with it the angle at which the
+          push leaves the ramp.</figcaption>
       </figure>
       <figure class="card">
-        <div class="slot slot-vid" data-slot>video</div>
-        <figcaption data-placeholder>Rollout three.</figcaption>
+        <img src="static/images/results_ramp.svg" width="506" height="159"
+             alt="Ramp: success rate and planning time per method.">
+      </figure>
+    </div>
+
+    <div class="task" id="task-block">
+      <h3>Block</h3>
+      <figure class="card">
+        <video src="static/videos/block_real_vs_transformed.mp4" width="1280" height="720"
+               controls loop muted playsinline preload="metadata"></video>
+        <figcaption><strong>Packing in simulation</strong>: three cubes are lined up in a tray with no free space
+          left for the item to be packed, and the robot can reach only the nearest of them; the
+          push stops on perceived contact between the cube being pushed and the next one. The
+          transformation shifts the two cubes the robot does not contact along the push axis, each
+          by its own amount.</figcaption>
+      </figure>
+      <figure class="card">
+        <video src="static/videos/block_real_vs_sim.mp4" width="1280" height="360"
+               controls loop muted playsinline preload="metadata"></video>
+        <figcaption><strong>Packing on hardware</strong>: the real scene is captured by a calibrated camera and
+          replicated in the simulator, where CMPM plans entirely in simulation (left). The low-level
+          action trajectory it returns is then replayed open-loop on the real robot (right).
+          Across 30 episodes with randomly perturbed cube positions, CMPM finds a solution in <strong>27</strong>,
+          with <strong>25</strong> end-to-end successes on the real robot.</figcaption>
+      </figure>
+      <figure class="card">
+        <img src="static/images/results_block.svg" width="506" height="159"
+             alt="Block: success rate and planning time per method.">
       </figure>
     </div>
   </section>
